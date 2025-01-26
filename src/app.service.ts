@@ -1,20 +1,27 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { InfluxDB, Point } from '@influxdata/influxdb-client';
+import * as process from 'node:process';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AppService {
   private readonly influxDB: InfluxDB;
-  constructor(@Inject('XIAO_CLIENT') private client: ClientProxy) {
+  constructor(
+    @Inject('XIAO_CLIENT') private client: ClientProxy,
+    private readonly configService: ConfigService,
+  ) {
     this.influxDB = new InfluxDB({
-      url: 'http://localhost:8086',
-      token:
-        'ptScm7qdVHVNzDF-E049WchXWgPb1AG7YKww_KsJ1n8sTkbeYHN2TK_weyLc4gF5V1J1L6EMOf4XvhhFJt9Cpw==',
+      url: process.env.INFLUXDB,
+      token: process.env.INFLUXDB_TOKEN,
     });
   }
 
   async saveDataToInfluxDB(data: number[]) {
-    const writeApi = this.influxDB.getWriteApi('IT', 'sound_detector');
+    const writeApi = this.influxDB.getWriteApi(
+      this.configService.get('influxdbOrg'),
+      this.configService.get('influxdbBucket'),
+    );
     const point = new Point('esp32_data')
       .tag('device', 'ESP32-S3')
       .stringField('value', data);
@@ -32,7 +39,6 @@ export class AppService {
       |> range(start: -5m)
       |> filter(fn: (r) => r._measurement == "esp32_data")
       |> sort(columns: ["_time"], desc: true)`;
-    const result = await queryApi.collectRows(query);
-    return result;
+    return await queryApi.collectRows(query);
   }
 }
