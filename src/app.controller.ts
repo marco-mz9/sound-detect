@@ -22,4 +22,9 @@ export class AppController {
   async getFromInfluxDB() {
     return await this.appService.getDataFromInfluxDB();
   }
+
+  @Get('count')
+  async countAedesAegypti() {
+    return await this.appService.countAedesAegyoty();
+  }
 }

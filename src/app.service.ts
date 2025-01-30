@@ -38,7 +38,18 @@ export class AppService {
     const query = `from(bucket: "sound_detector")
       |> range(start: -5m)
       |> filter(fn: (r) => r._measurement == "esp32_data")
+      |> limit(n:5) 
       |> sort(columns: ["_time"], desc: true)`;
+    return await queryApi.collectRows(query);
+  }
+
+  async countAedesAegyoty() {
+    const queryApi = this.influxDB.getQueryApi('IT');
+    const query = `from(bucket: "sound_detector")
+    |> range(start: -5m) // Ajusta el rango si es necesario
+    |> filter(fn: (r) => r._measurement == "esp32_data")
+    |> filter(fn: (r) => r._value == "aedes_aegypti")
+    |> count()`;
     return await queryApi.collectRows(query);
   }
 }
