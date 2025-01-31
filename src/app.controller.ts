@@ -12,7 +12,7 @@ export class AppController {
   constructor(private readonly appService: AppService) {}
 
   @MessagePattern('test/xiao')
-  getNotifications(@Payload() data: number[], @Ctx() context: MqttContext) {
+  getNotifications(@Payload() data: string, @Ctx() context: MqttContext) {
     console.log(`Topic: ${context.getTopic()}`);
     console.log('Data:', data);
     this.appService.saveDataToInfluxDB(data);

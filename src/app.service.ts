@@ -17,14 +17,14 @@ export class AppService {
     });
   }
 
-  async saveDataToInfluxDB(data: number[]) {
+  async saveDataToInfluxDB(data: string) {
     const writeApi = this.influxDB.getWriteApi(
       this.configService.get('influxdbOrg'),
       this.configService.get('influxdbBucket'),
     );
     const point = new Point('esp32_data')
       .tag('device', 'ESP32-S3')
-      .stringField('value', data);
+      .tag('value', data);
     writeApi.writePoint(point);
     try {
       await writeApi.close();
@@ -35,7 +35,7 @@ export class AppService {
 
   async getDataFromInfluxDB() {
     const queryApi = this.influxDB.getQueryApi('IT');
-    const query = `from(bucket: "sound_detector")
+    const query = `from(bucket: "sound_mosquito")
       |> range(start: -5m)
       |> filter(fn: (r) => r._measurement == "esp32_data")
       |> limit(n:5) 
@@ -45,7 +45,7 @@ export class AppService {
 
   async countAedesAegyoty() {
     const queryApi = this.influxDB.getQueryApi('IT');
-    const query = `from(bucket: "sound_detector")
+    const query = `from(bucket: "sound_mosquito")
     |> range(start: -5m) // Ajusta el rango si es necesario
     |> filter(fn: (r) => r._measurement == "esp32_data")
     |> filter(fn: (r) => r._value == "aedes_aegypti")
